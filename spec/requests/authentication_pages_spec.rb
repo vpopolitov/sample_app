@@ -16,6 +16,8 @@ describe "Authentication" do
       
       it { should have_selector('title', text: 'Sign in') }
       it { should have_error_message('Invalid') }
+      it { should_not have_link('Profile') }
+      it { should_not have_link('Settings') }
       
       describe "after visiting another page" do
         before { click_link 'Home' }
@@ -79,6 +81,19 @@ describe "Authentication" do
             page.should have_selector('title', text: 'Edit user')
           end
         end
+        
+        describe "when signing in again" do
+          before do
+            visit signin_path
+            fill_in "Email",    with: user.email
+            fill_in "Password", with: user.password
+            click_button "Sign in"
+          end
+          
+          it "should render the default (profile) page" do
+            page.should have_selector('title', text: user.name)
+          end
+        end
       end
     end
     
@@ -106,6 +121,22 @@ describe "Authentication" do
       
       describe "submitting a DELETE request to the Users#destroy action" do
         before { delete user_path(user) }
+        specify { response.should redirect_to(root_path) }
+      end
+    end
+    
+    describe "as signed-in user" do
+      let(:user) { FactoryGirl.create :user }
+            
+      before { sign_in user }
+      
+      describe "visiting a the Users#new action" do
+        before { visit new_user_path }
+        it { should_not have_selector('title', text: full_title('Sign up')) }
+      end
+      
+      describe "submitting a POST request to the Users#create action" do
+        before { post users_path }
         specify { response.should redirect_to(root_path) }
       end
     end
