@@ -43,5 +43,16 @@ describe "Micropost pages" do
         expect { click_link "delete" }.should change(Micropost, :count).by(-1)
       end
     end
+    
+    describe "as uncorrect user" do
+    
+      let(:another_user) { FactoryGirl.create(:admin) }
+      
+      before { visit user_path(another_user) }
+      
+      it "should not have a links to delete posts from another users" do
+        should_not have_selector('a', text: 'delete')
+      end
+    end
   end
 end
