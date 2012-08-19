@@ -213,6 +213,22 @@ describe User do
       its(:followers) { should include(@user) }
     end
     
+    it "should destroy associated relationships for follower user" do
+      relationships = Array(@user.relationships)
+      @user.destroy
+      relationships.each do |r|
+        Relationship.find_by_id(r.id).should be_nil
+      end
+    end
+    
+    it "should destroy associated relationships for followed user" do
+      relationships = Array(other_user.reverse_relationships)
+      other_user.destroy
+      relationships.each do |r|
+        Relationship.find_by_id(r.id).should be_nil
+      end
+    end
+    
     describe "and unfollowing" do
     
       before { @user.unfollow!(other_user) }
